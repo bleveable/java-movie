@@ -1,2 +1,2 @@
 # java-movie
-Making a movie 
+Making an app where users can buy movies
