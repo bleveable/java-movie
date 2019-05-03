@@ -216,14 +216,22 @@ public class DBOperation {
             create.executeUpdate();
             create = con.prepareStatement("CREATE TABLE IF NOT EXISTS logins("
                     + "UserID int Auto_Increment not null, CustomerID int not null, LoginName varchar(15) not null,"
-                    + "PassHash varchar(50) not null, PRIMARY KEY(USERID), "
+                    + "PassHash varchar(50) not null, PRIMARY KEY(UserID), "
                     + "FOREIGN KEY (CustomerID) REFERENCES customers(CustomerID))");
+            create.executeUpdate();
+            create = con.prepareStatement("CREATE TABLE IF NOT EXISTS cart("
+                    + "ItemID int Auto_Increment not null, CustomerID int not null,"
+                    + " MovieID int not null, PRIMARY KEY(ItemID), "
+                    + "FOREIGN KEY (CustomerID) REFERENCES customers(CustomerID), "
+                    + "FOREIGN KEY (MovieID) REFERENCES movies(MovieID))");
             create.executeUpdate();
         }   
         catch (SQLException e) {
             e.printStackTrace(System.err);
         }
     }
+    
+    //public boolean addToCart(Customer cust, )
     
     public boolean createAccount(Customer cust, String login, String pass) throws Exception {
         String insertedPass = hashPass(pass);
