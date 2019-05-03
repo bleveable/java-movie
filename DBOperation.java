@@ -197,7 +197,7 @@ public class DBOperation {
             create.executeUpdate();
             create = con.prepareStatement("CREATE TABLE IF NOT EXISTS customers("
                     + "CustomerID int Auto_Increment not null, firstName varchar(50) not null, "
-                    + "lastName varchar(255) not null, dob date not null, phoneNum varchar(20),"
+                    + "lastName varchar(255) not null, dob varchar(20) not null, email varchar(40),"
                     + " PRIMARY KEY(CustomerID))");
             create.executeUpdate();
             create = con.prepareStatement("CREATE TABLE IF NOT EXISTS transactions("
@@ -228,14 +228,14 @@ public class DBOperation {
     public boolean createAccount(Customer cust, String login, String pass) throws Exception {
         String insertedPass = hashPass(pass);
         int custID;
-        PreparedStatement logCheck = con.prepareStatement("SELECT UserID from logins"
+        PreparedStatement logCheck = con.prepareStatement("SELECT UserID from logins "
                 + "WHERE LoginName = '" + login + "'");
         ResultSet result = logCheck.executeQuery();
         if (result.next()) {
             return false;
         }
         else {
-            logCheck = con.prepareStatement("INSERT INTO customers (firstName, lastName, dob, phoneNum) VALUES"
+            logCheck = con.prepareStatement("INSERT INTO customers (firstName, lastName, dob, email) VALUES"
                     + "('" + cust.getFirst() + "', '" + cust.getLast() + "', '" + cust.getDob() + "', '"
                             + cust.getEmail() + "')");
             logCheck.executeUpdate();
@@ -246,14 +246,15 @@ public class DBOperation {
             custID = result.getInt("CustomerID");
             logCheck = con.prepareStatement("INSERT INTO logins (CustomerID, LoginName, PassHash) VALUES"
                     + "(" + custID + ", '" + login + "', '" + insertedPass + "')");
+            logCheck.executeUpdate();
             return true;
         }        
     }
     
     public boolean logIn(String login, String pass) throws Exception {
         String insertedPass = hashPass(pass);
-        PreparedStatement logCheck = con.prepareStatement("SELECT UserID from logins"
-                + "WHERE LoginName = '" + login + "' AND PassHash = '" + insertedPass +"'");
+        PreparedStatement logCheck = con.prepareStatement("SELECT UserID from logins "
+                + "WHERE LoginName = '" + login + "' AND PassHash = '" + insertedPass + "'");
         ResultSet result = logCheck.executeQuery();
         if (result.next()) {
             return true;
@@ -286,7 +287,7 @@ public class DBOperation {
             String driver = "com.mysql.cj.jdbc.Driver";
             String url = "jdbc:mysql://localhost:3306/javamovie";
             String username = "root";
-            String password = "Moneyball911!";
+            String password = "";
             Class.forName(driver);
             
             Connection conn = DriverManager.getConnection(url, username, password);
@@ -300,16 +301,18 @@ public class DBOperation {
     }
     
     public String hashPass(String initialPass) {
+        char[] regPass = initialPass.toCharArray();
         char[] hashArray = new char[initialPass.length()]; 
         int i = 0;
-        for (char c: initialPass.toCharArray()) {
-            c *= 3;
-            c += 32;
+        for (char c: regPass) {
+            c *= 2;
+            c -= 3;
             c -= initialPass.charAt(initialPass.length() - 1);
+            c += initialPass.charAt(0);
             hashArray[i] = c;
             ++i;
         }
-        String hash = hashArray.toString();
+        String hash = String.valueOf(hashArray);
         return hash;
     }
     
