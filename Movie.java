@@ -71,4 +71,9 @@ public class Movie {
     public void setPoster(String posterIn) {
         poster = posterIn;
     }
+    
+    @Override
+    public String toString() {
+        return getName() + "  " + "$" + getPrice();
+    }
 }

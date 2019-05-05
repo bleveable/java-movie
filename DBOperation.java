@@ -259,17 +259,44 @@ public class DBOperation {
         }        
     }
     
-    public boolean logIn(String login, String pass) throws Exception {
+    public Customer logIn(String login, String pass) throws Exception {
+        Customer customer = null;
+        int custID;
         String insertedPass = hashPass(pass);
-        PreparedStatement logCheck = con.prepareStatement("SELECT UserID from logins "
+        PreparedStatement logCheck = con.prepareStatement("SELECT CustomerID from logins "
                 + "WHERE LoginName = '" + login + "' AND PassHash = '" + insertedPass + "'");
         ResultSet result = logCheck.executeQuery();
         if (result.next()) {
-            return true;
+            customer = new Customer();
+            custID = result.getInt("CustomerID");
+            PreparedStatement custCheck = con.prepareStatement("SELECT firstname, lastname, dob, email from customers "
+                + "WHERE customerid = " + custID + "");
+            result = custCheck.executeQuery();
+            result.next();
+            customer = new Customer();
+            customer.setID(custID);
+            customer.setFirst(result.getString("firstname"));
+            customer.setLast(result.getString("lastname"));
+            customer.setDob(result.getString("dob"));
+            customer.setEmail(result.getString("email"));
+            return customer;
         }
-        else {
-            return false;
+        return null;
+    }
+    
+    public Customer logIn(String search) throws Exception {
+        Customer customer = null;
+        PreparedStatement customerCheck = con.prepareStatement("SELECT customerid, firstname, lastname, dob, email from customers "
+                + "WHERE firstname = '" + search + "'");
+        ResultSet result = customerCheck.executeQuery();
+        if(result.next()) {
+            customer = new Customer();
+            customer.setID(result.getInt("customerId"));
+            customer.setFirst(result.getString("firstname"));
+            customer.setLast(result.getString("lastname"));
+            customer.setEmail(result.getString("phonenum"));
         }
+        return customer;
     }
     
     public ArrayList<Movie> searchMovie(String search) throws Exception {
@@ -290,12 +317,30 @@ public class DBOperation {
        return retArray;
     }
     
+    public ArrayList<Movie> searchGenre(String search) throws Exception {
+       ArrayList<Movie> retArray = new ArrayList<>();
+       Movie insMovie;
+       PreparedStatement genreCheck = con.prepareStatement("SELECT name, year, price, genre, poster from movies "
+               + "WHERE genre like '%" + search + "%'");
+        ResultSet result = genreCheck.executeQuery();
+        while (result.next()) {
+           insMovie = new Movie();
+           insMovie.setName(result.getString("name"));
+           insMovie.setYear(result.getInt("year"));
+           insMovie.setPrice(result.getDouble("price"));
+           insMovie.setGenre(result.getString("genre"));
+           insMovie.setPoster(result.getString("poster"));
+           retArray.add(insMovie);
+       }
+       return retArray;
+    }
+    
     private Connection getConnection() throws Exception {
         try {
             String driver = "com.mysql.cj.jdbc.Driver";
             String url = "jdbc:mysql://localhost:3306/javamovie";
             String username = "root";
-            String password = "";
+            String password = "Moneyball911!";
             Class.forName(driver);
             
             Connection conn = DriverManager.getConnection(url, username, password);
