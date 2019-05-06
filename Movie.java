@@ -6,6 +6,7 @@ public class Movie {
     private double price;
     private String genre;
     private String poster;
+    private int id;
 
     public Movie() {
         name = "";
@@ -13,14 +14,24 @@ public class Movie {
         price = 0;
         genre = "";
         poster = "";
+        id = 0;
     }
 
-    public Movie(String nameIn, int yearIn, double priceIn, String genreIn, String posterIn) {
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public Movie(String nameIn, int yearIn, double priceIn, String genreIn, String posterIn, int id) {
         name = nameIn;
         year = yearIn;
         price = priceIn;
         genre = genreIn;
         poster = posterIn;
+        this.id = id;
     }
 
     public String getName() {

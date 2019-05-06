@@ -19,11 +19,11 @@ import javafx.scene.Node;
 public class Main extends Application {
 
     private DBOperation database = null;
-     private Customer logIn = null;
+    private Customer logIn = null;
+    private ArrayList<Movie> cart = new ArrayList<>();
+
     @Override
     public void start(Stage primaryStage) {
-
-
 
         try {
             database = new DBOperation();
@@ -47,7 +47,6 @@ public class Main extends Application {
     }
     //----Border Pane Top
     private HBox getTopHBox() {
-        ArrayList<Movie> cart = new ArrayList<>();
         HBox hBox = new HBox();
         hBox.setPadding(new Insets(10));
 
@@ -103,14 +102,10 @@ public class Main extends Application {
 
             ArrayList<Movie> movieSearch;
                 try {
-                    if(logIn == null){
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Not logged In");
-                        alert.setHeaderText(null);
-                        alert.setContentText("You must login before you can use the system.");
-                        alert.showAndWait();
+                    if(loginFirstPopUp()){
                         return;
                     }
+
                     movieSearch = database.searchMovie(userInput);
                     movieSearch.forEach(m -> {
                         listView.getItems().add(m.toString());
@@ -149,6 +144,17 @@ public class Main extends Application {
 
         logInWindow(signInButton, "Sign in");
 
+        //logout button
+        Button logoutButton = new Button("Logout");
+        logoutButton.setStyle("-fx-background-color: dodgerblue");
+        logoutButton.setPrefWidth(70);
+        logoutButton.setPrefHeight(30);
+        logoutButton.setOnAction(e ->{
+            if(logIn != null){
+                logIn = null;
+            }
+        });
+
         //ShopCart button
         Button shopCar = new Button();
         ImageView cartImage = new ImageView("cart.png");
@@ -160,25 +166,81 @@ public class Main extends Application {
 
 
         shopCar.setOnAction(e -> {
+            if(loginFirstPopUp()){
+                return;
+            }
             Button checkOut = new Button("Checkout");
+            Button deleteButton = new Button("Delete Movie");
             Stage nw=new Stage();
             double total = 0;
 
+            Button returnButton = new Button("Continue Shopping");
+            returnButton.setOnAction(e3 ->{
+                nw.close();
+            });
+
             BorderPane borderPane = new BorderPane();
+            borderPane.setPadding(new Insets(10));
+            Label yourShopCart = new Label("Confirm your listing");
+            yourShopCart.setPadding(new Insets(10));
 
             nw.initModality(Modality.APPLICATION_MODAL);
             nw.setTitle("Shoping cart");
             ListView<String> listView = new ListView<>();
+            listView.setPadding(new Insets(20));
             for(Movie movie: cart) {
                 listView.getItems().add(movie.toString());
                 total += movie.getPrice();
             }
-            Label labelTotal = new Label(" $" + String.format("%.2f", total));
-            borderPane.setTop(listView);
-            borderPane.setCenter(labelTotal);
-            borderPane.setBottom(checkOut);
+            Label labelTotal = new Label("Total: $" + String.format("%.2f", total));
+            labelTotal.setPadding(new Insets(100,0,0,0));
 
-            Scene scene1= new Scene(borderPane, 500, 500);
+            deleteButton.setOnAction(ex -> {
+                cart.remove(listView.getSelectionModel().getSelectedIndex());
+            });
+
+            checkOut.setOnAction(ex -> {
+                int CustomerID = logIn.getCustomerId();
+
+                for(Movie movie : cart)
+                    try {
+                        database.purchases(CustomerID, movie.getId());
+                    } catch (Exception ex1) {
+                        System.out.println("error 1");
+                        throw new RuntimeException(ex1);
+                    }
+
+                Stage nw2=new Stage();
+
+                nw2.initModality(Modality.APPLICATION_MODAL);
+                nw2.setTitle("Top Chart");
+
+                BorderPane borderPane1 = new BorderPane();
+                borderPane.setPadding(new Insets(30));
+                Label label = new Label("Thank You For Your Purchase!");
+
+                Button doneButton = new Button("Done");
+                borderPane1.setCenter(label);
+                borderPane1.setBottom(doneButton);
+
+
+
+                Scene scene1= new Scene(borderPane1, 300, 250);
+
+                nw2.setScene(scene1);
+
+                nw2.showAndWait();
+            });
+
+            VBox vBox = new VBox();
+            vBox.setPadding(new Insets(20));
+            vBox.getChildren().addAll(returnButton, deleteButton, labelTotal, checkOut);
+            vBox.setSpacing(10);
+            borderPane.setTop(yourShopCart);
+            borderPane.setCenter(listView);
+            borderPane.setRight(vBox);
+
+            Scene scene1= new Scene(borderPane, 500, 320);
 
             nw.setScene(scene1);
 
@@ -186,11 +248,12 @@ public class Main extends Application {
         });
 
         //--------------Add all the controls to the hBox
-        hBox.getChildren().addAll(imageLogo, labelLogo, searchTextField, searchButton, signInButton, shopCar);
+        hBox.getChildren().addAll(imageLogo, labelLogo, searchTextField, searchButton, logoutButton, signInButton, shopCar);
         hBox.setMargin(searchButton, new Insets(7, 0, 0, 0));
         hBox.setMargin(searchTextField, new Insets(7, 0, 0, 40));
         hBox.setMargin(imageLogo, new Insets(-5, 3, 0, 0));
-        hBox.setMargin(signInButton, new Insets(7, 10, 0, 150));
+        hBox.setMargin(logoutButton, new Insets(7, 5, 0, 120));
+        hBox.setMargin(signInButton, new Insets(6, 5, 0, 0));
         hBox.setMargin(shopCar, new Insets(6, -3, 0, 0));
 
         return hBox;
@@ -237,6 +300,7 @@ public class Main extends Application {
 
         MenuButton menuButton = new MenuButton("Genres", null, action, adventure, sciFi, fantasy, drama, family, musical, romance, mystery,
                                                thriller, crime, animation, comedy);
+
         menuButton.setStyle("-fx-background-color: whitesmoke; -fx-text-fill: lightgrey; -fx-font-size: 2em");
         vBox.setMargin(menuButton, new Insets(10, 0, 0, 15));
         menuButton.setFont(new Font("Courier", 14));
@@ -258,10 +322,14 @@ public class Main extends Application {
             ListView listView = new ListView();
             Label addMovie = new Label("Add movie: ");
             addMovie.setPadding(new Insets(10));
-            Button doneButton = new Button("Done");
+            Button doneButton = new Button("Go Back");
+            Button checkOutButton = new Button("Add To Cart");
 
             ArrayList<Movie> movieSearch;
             try {
+                if(loginFirstPopUp()){
+                    return;
+                }
                 movieSearch = database.searchMovie("Toy Story 4");
                 movieSearch.forEach(m -> {
                     String movie = m.getName() + ".  " + "Year: " + m.getYear() + " $" + m.getPrice();
@@ -272,9 +340,20 @@ public class Main extends Application {
                 throw new RuntimeException(ex);
             }
 
+            checkOutButton.setOnAction(e2 -> {
+                cart.add(movieSearch.get(listView.getSelectionModel().getSelectedIndex()));
+            });
+
+            doneButton.setOnAction(e3 -> {
+                nw.close();
+            });
+
+            HBox hBox = new HBox();
+            hBox.setSpacing(100);
+            hBox.getChildren().addAll(doneButton, checkOutButton);
             borderPane.setCenter(listView);
             borderPane.setTop(addMovie);
-            borderPane.setBottom(doneButton);
+            borderPane.setBottom(hBox);
             Scene scene1= new Scene(borderPane, 300, 250);
 
             nw.setScene(scene1);
@@ -290,12 +369,29 @@ public class Main extends Application {
         button4.setFont(new Font("Courier", 14));
 
         button4.setOnAction(e -> {
+
+            ListView listView = new ListView();
+
+            ArrayList<Movie> movieSearch;
+            try {
+                movieSearch = database.topChart();
+                movieSearch.forEach(m -> {
+                    listView.getItems().add(m.getName() + " " + m.getPrice());
+                });
+            } catch (Exception ex) {
+                System.out.println("error 1");
+                throw new RuntimeException(ex);
+            }
+
+
+
             Stage nw=new Stage();
 
             nw.initModality(Modality.APPLICATION_MODAL);
             nw.setTitle("Top Chart");
 
             BorderPane borderPane = new BorderPane();
+            borderPane.setCenter(listView);
 
             Scene scene1= new Scene(borderPane, 300, 250);
 
@@ -401,26 +497,36 @@ public class Main extends Application {
             nw.setTitle(name);
 
             BorderPane borderPane = new BorderPane();
-            borderPane.setPadding(new Insets(30));
+            borderPane.setPadding(new Insets(30,0,30,30));
             GridPane gridPane = new GridPane();
-            gridPane.setPadding(new Insets(10));
             gridPane.setHgap(10);
             gridPane.setVgap(10);
 
+            //Register
+            Button registerButton = new Button("Register");
+            registerButton.setStyle("-fx-background-color: gray");
+            registerButton.setPrefWidth(70);
+            registerButton.setPrefHeight(30);
+            registerWindow(registerButton, "Register");
+
             Label firstNameLabel = new Label("User Name: ");
-            //Label passwordLabel = new Label("Password: ");
+            Label passwordLabel = new Label("Password: ");
             TextField firstNameField = new TextField();
-            //PasswordField passwordField = new PasswordField();
-            Button okButton = new Button("OK");
+            PasswordField passwordField = new PasswordField();
+            Button loginButton = new Button("Login");
             Button cancelButton = new Button("Cancel");
+            Label notAccountLabel = new Label("Don't have an account? ");
+            HBox hBox = new HBox();
+            hBox.setSpacing(30);
+            hBox.getChildren().addAll(notAccountLabel, registerButton);
 
             cancelButton.setOnAction(ex -> {
                 nw.close();
             });
 
-            okButton.setOnAction(ok ->{
+            loginButton.setOnAction(ok ->{
                 try {
-                    logIn = database.logIn(firstNameField.getText());
+                    logIn = database.logIn(firstNameField.getText(), passwordField.getText());
                     if(logIn == null){
                         Alert alert = new Alert(Alert.AlertType.INFORMATION);
                         alert.setTitle("Log In Failed");
@@ -444,19 +550,118 @@ public class Main extends Application {
 
             gridPane.add(firstNameLabel, 0, 0);
             gridPane.add(firstNameField, 1, 0);
-            //gridPane.add(passwordLabel, 0, 1);
-            //gridPane.add(passwordField, 1, 1);
-            gridPane.add(okButton, 0, 2);
+            gridPane.add(passwordLabel, 0, 1);
+            gridPane.add(passwordField, 1, 1);
+            gridPane.add(loginButton, 0, 2);
             gridPane.add(cancelButton, 1, 2);
 
-            borderPane.setCenter(gridPane);
 
-            Scene scene1= new Scene(borderPane, 350, 200);
+            borderPane.setCenter(gridPane);
+            borderPane.setBottom(hBox);
+
+            Scene scene1= new Scene(borderPane, 320, 250);
 
             nw.setScene(scene1);
 
             nw.showAndWait();
         });
+    }
+
+    //This method creates a login window, parameters are the button being pressed and the name of the new window
+    public void registerWindow(Button button, String name) {
+        button.setOnAction(e -> {
+            Stage nw=new Stage();
+
+            nw.initModality(Modality.APPLICATION_MODAL);
+            nw.setTitle(name);
+
+            BorderPane borderPane = new BorderPane();
+            borderPane.setPadding(new Insets(31,0,30,30));
+            GridPane gridPane = new GridPane();
+            gridPane.setPadding(new Insets(11));
+            gridPane.setHgap(10);
+            gridPane.setVgap(10);
+
+            Label firstNameLabel = new Label("First Name: ");
+            Label lastNameLabel = new Label("Last Name: ");
+            Label dateOfBirthLabel = new Label("Date of Birth: ");
+            Label emailLabel = new Label("Email: ");
+            Label userNameLabel = new Label("User Name: ");
+            Label passwordLabel = new Label("Password: ");
+            TextField firstNameField = new TextField();
+            TextField lastNameField = new TextField();
+            TextField dateOfBirthField = new TextField();
+            TextField emailField = new TextField();
+            TextField userNameField = new TextField();
+            PasswordField passwordField = new PasswordField();
+            Button submitButton = new Button("Submit");
+            Button cancelButton = new Button("Cancel");
+
+            cancelButton.setOnAction(ex -> {
+                nw.close();
+            });
+            submitButton.setOnAction(ok ->{
+                try {
+                    Customer cust = new Customer(-1, firstNameField.getText(), lastNameField.getText(),
+                            dateOfBirthField.getText(), emailField.getText());
+                    boolean loggedIn = database.createAccount(cust, userNameField.getText(), passwordField.getText());
+                    if(loggedIn == false){
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Register Failed");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Invalid registry information");
+                        alert.showAndWait();
+                    } else{
+                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                        alert.setTitle("Registration was successful");
+                        alert.setHeaderText(null);
+                        alert.setContentText("You may now log in with your account information.");
+                        alert.showAndWait();
+                        nw.close();
+                    }
+                } catch (Exception ex) {
+                    System.out.println("error 1");
+                    throw new RuntimeException(ex);
+                }
+
+            });
+            gridPane.add(firstNameLabel, 0, 0);
+            gridPane.add(firstNameField, 1, 0);
+            gridPane.add(lastNameLabel, 0, 1);
+            gridPane.add(lastNameField, 1, 1);
+            gridPane.add(dateOfBirthLabel, 0, 2);
+            gridPane.add(dateOfBirthField, 1, 2);
+            gridPane.add(emailLabel, 0, 3);
+            gridPane.add(emailField, 1, 3);
+            gridPane.add(userNameLabel, 0, 4);
+            gridPane.add(userNameField, 1, 4);
+            gridPane.add(passwordLabel, 0, 5);
+            gridPane.add(passwordField, 1, 5);
+
+            gridPane.add(submitButton, 0, 7);
+            gridPane.add(cancelButton, 1, 7);
+
+            borderPane.setCenter(gridPane);
+
+            Scene scene1= new Scene(borderPane, 330, 300);
+
+            nw.setScene(scene1);
+
+            nw.showAndWait();
+        });
+    }
+
+    public boolean loginFirstPopUp(){
+        boolean result = false;
+        if(logIn == null){
+            result = true;
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("Not logged In");
+            alert.setHeaderText(null);
+            alert.setContentText("You must login before you can use the system.");
+            alert.showAndWait();
+        }
+        return result;
     }
 
     public static void main(String[] args) {
