@@ -283,23 +283,61 @@ public class Main extends Application {
         button1.setPrefWidth(180);
         button1.setFont(new Font("Courier", 15));
 
-        //Genres button
-        MenuItem action = new MenuItem("Action");
-        MenuItem adventure = new MenuItem("Adventure");
-        MenuItem sciFi = new MenuItem("Sci-Fi");
-        MenuItem fantasy = new MenuItem("Fantasy");
-        MenuItem drama = new MenuItem("Drama");
-        MenuItem family = new MenuItem("Family");
-        MenuItem musical = new MenuItem("Musical");
-        MenuItem romance = new MenuItem("Romance");
-        MenuItem mystery = new MenuItem("Mystery");
-        MenuItem thriller = new MenuItem("Thriller");
-        MenuItem crime = new MenuItem("Crime");
-        MenuItem animation = new MenuItem("Animation");
-        MenuItem comedy = new MenuItem("Comedy");
 
-        MenuButton menuButton = new MenuButton("Genres", null, action, adventure, sciFi, fantasy, drama, family, musical, romance, mystery,
-                                               thriller, crime, animation, comedy);
+        //-------------Genre Button
+        ArrayList<String> genreList = new ArrayList<>();
+        genreList.add("Action");
+        genreList.add("Adventure");
+        genreList.add("Sci-Fi");
+        genreList.add("Fantasy");
+        genreList.add("Drama");
+        genreList.add("Family");
+        genreList.add("Musical");
+        genreList.add("Romance");
+        genreList.add("Mystery");
+        genreList.add("Thriller");
+        genreList.add("Crime");
+        genreList.add("Animation");
+        genreList.add("Adventure");
+        genreList.add("Comedy");
+
+        MenuButton menuButton = new MenuButton("Genres");
+
+        for(int i = 0; i < 14; i++) {
+            MenuItem item = new MenuItem(genreList.get(i));
+            item.setOnAction(a->{
+                ListView listVi = new ListView();
+
+                ArrayList<Movie> movieSearch;
+                try {
+                    movieSearch = database.searchGenre(item.getText());
+                    movieSearch.forEach(m -> {
+                        String movie = m.getName() + ".  " + "Year: " + m.getYear() + " $" + m.getPrice();
+                        listVi.getItems().add(movie);
+                    });
+                } catch (Exception ex) {
+                    System.out.println("error 1");
+                    throw new RuntimeException(ex);
+                }
+
+
+                Stage popUpWin=new Stage();
+
+                popUpWin.initModality(Modality.APPLICATION_MODAL);
+                popUpWin.setTitle("Genres");
+
+                BorderPane borderPane = new BorderPane();
+                borderPane.setCenter(listVi);
+
+                Scene scene1= new Scene(borderPane, 299, 250);
+
+                popUpWin.setScene(scene1);
+
+                popUpWin.showAndWait();
+            });
+            menuButton.getItems().add(item);
+        }
+
 
         menuButton.setStyle("-fx-background-color: whitesmoke; -fx-text-fill: lightgrey; -fx-font-size: 2em");
         vBox.setMargin(menuButton, new Insets(10, 0, 0, 15));
