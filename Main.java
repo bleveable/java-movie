@@ -370,7 +370,7 @@ public class Main extends Application {
                 throw new RuntimeException(ex);
             }
 
-            selectionDisplay(listView,  movieSearch, "Top");
+            selectionDisplay(listView,  movieSearch, "Top Chart");
 
         });
 
@@ -685,7 +685,7 @@ public class Main extends Application {
             //GridPane gridPane = new GridPane();
             BorderPane borderPane = new BorderPane();
             borderPane.setPadding(new Insets(0, 30, 30, 30));
-            Label addMovies = new Label("Add Movie:");
+            Label addMovies = new Label("Select Movie:");
             addMovies.setPadding(new Insets(10));
             ListView<String> listView = new ListView();
             listView.setMinWidth(300);
