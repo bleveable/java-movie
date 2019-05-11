@@ -141,7 +141,7 @@ public class Main extends Application {
             yourShopCart.setPadding(new Insets(10));
 
             nw.initModality(Modality.APPLICATION_MODAL);
-            nw.setTitle("Shoping cart");
+            nw.setTitle("Shopping cart");
             ListView<String> listView = new ListView<>();
             listView.setPadding(new Insets(20));
             for(Movie movie: cart) {
@@ -169,23 +169,16 @@ public class Main extends Application {
                 Stage nw2=new Stage();
 
                 nw2.initModality(Modality.APPLICATION_MODAL);
-                nw2.setTitle("Top Chart");
+                nw2.setTitle("Shopping Cart");
 
-                BorderPane borderPane1 = new BorderPane();
-                borderPane.setPadding(new Insets(30));
-                Label label = new Label("Thank You For Your Purchase!");
-
-                Button doneButton = new Button("Done");
-                borderPane1.setCenter(label);
-                borderPane1.setBottom(doneButton);
-
-
-
-                Scene scene1= new Scene(borderPane1, 300, 250);
-
-                nw2.setScene(scene1);
-
-                nw2.showAndWait();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Purchase Successful");
+                alert.setHeaderText(null);
+                alert.setContentText("Thank You For Your Purchase!");
+                alert.showAndWait();
+                nw2.close();
+                nw.close();
+                listView.getItems().clear();
             });
 
             VBox vBox = new VBox();
@@ -465,6 +458,8 @@ public class Main extends Application {
 
         return root;
     }
+
+    //-------Functions
 
     //This method creates a login window, parameters are the button being pressed and the name of the new window
     public void logInWindow(String name) {
