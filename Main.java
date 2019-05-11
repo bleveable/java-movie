@@ -75,59 +75,7 @@ public class Main extends Application {
 
         //This action will pop up a window with the desire movies
         searchTextField.setOnAction(e -> {
-
-            Stage popUpWindow=new Stage();
-
-            popUpWindow.initModality(Modality.APPLICATION_MODAL);
-            popUpWindow.setTitle("Find criteria");
-
-            //GridPane gridPane = new GridPane();
-            BorderPane borderPane = new BorderPane();
-            borderPane.setPadding(new Insets(0, 30, 30, 30));
-            Label addMovies = new Label("Add Movie:");
-            addMovies.setPadding(new Insets(10));
-            ListView<String> listView = new ListView();
-            listView.setMinWidth(300);
-            Button doneButton = new Button("Done");
-            Button addButton = new Button("Add to Cart");
-            HBox hBox1 = new HBox();
-            hBox1.setSpacing(210);
-            hBox1.getChildren().addAll(doneButton, addButton);
-
-            doneButton.setOnAction(donebutton -> {
-                popUpWindow.close();
-            });
-
-            String userInput = searchTextField.getText();
-
-            ArrayList<Movie> movieSearch;
-                try {
-                    if(loginFirstPopUp()){
-                        return;
-                    }
-
-                    movieSearch = database.searchMovie(userInput);
-                    movieSearch.forEach(m -> {
-                        listView.getItems().add(m.toString());
-                    });
-                } catch (Exception ex) {
-                    System.out.println("error 1");
-                    throw new RuntimeException(ex);
-                }
-
-            addButton.setOnAction(actionEvent -> {
-                cart.add(movieSearch.get(listView.getSelectionModel().getSelectedIndex()));
-            });
-
-            borderPane.setCenter(listView);
-            borderPane.setTop(addMovies);
-            borderPane.setBottom(hBox1);
-
-            Scene scene1= new Scene(borderPane, 400, 400);
-
-            popUpWindow.setScene(scene1);
-
-            popUpWindow.showAndWait();
+            searchTextPopUp(searchTextField);
         });
 
                 //Search Button
@@ -135,6 +83,11 @@ public class Main extends Application {
         searchButton.setPrefHeight(30);
         searchButton.setPrefWidth(50);
         searchButton.setGraphic(searchImage);
+
+        searchButton.setOnMouseClicked(e -> { //////
+            searchTextPopUp(searchTextField);
+        });
+
 
         //Sign in Button
         Button signInButton = new Button("Sign in");
@@ -306,6 +259,9 @@ public class Main extends Application {
         for(int i = 0; i < 14; i++) {
             MenuItem item = new MenuItem(genreList.get(i));
             item.setOnAction(a->{
+                if(loginFirstPopUp()){
+                    return;
+                }
                 ListView listVi = new ListView();
 
                 ArrayList<Movie> movieSearch;
@@ -320,20 +276,7 @@ public class Main extends Application {
                     throw new RuntimeException(ex);
                 }
 
-
-                Stage popUpWin=new Stage();
-
-                popUpWin.initModality(Modality.APPLICATION_MODAL);
-                popUpWin.setTitle("Genres");
-
-                BorderPane borderPane = new BorderPane();
-                borderPane.setCenter(listVi);
-
-                Scene scene1= new Scene(borderPane, 299, 250);
-
-                popUpWin.setScene(scene1);
-
-                popUpWin.showAndWait();
+                selectionDisplay(listVi,  movieSearch, "Genre");
             });
             menuButton.getItems().add(item);
         }
@@ -350,6 +293,9 @@ public class Main extends Application {
         vBox.setMargin(button3, new Insets(5, 0, 0, 0));
         button3.setFont(new Font("Courier", 14));
         button3.setOnAction(e -> {
+            if(loginFirstPopUp()){
+                return;
+            }
             Stage nw=new Stage();
 
             nw.initModality(Modality.APPLICATION_MODAL);
@@ -407,6 +353,9 @@ public class Main extends Application {
         button4.setFont(new Font("Courier", 14));
 
         button4.setOnAction(e -> {
+            if(loginFirstPopUp()){
+                return;
+            }
 
             ListView listView = new ListView();
 
@@ -421,21 +370,8 @@ public class Main extends Application {
                 throw new RuntimeException(ex);
             }
 
+            selectionDisplay(listView,  movieSearch, "Top");
 
-
-            Stage nw=new Stage();
-
-            nw.initModality(Modality.APPLICATION_MODAL);
-            nw.setTitle("Top Chart");
-
-            BorderPane borderPane = new BorderPane();
-            borderPane.setCenter(listView);
-
-            Scene scene1= new Scene(borderPane, 300, 250);
-
-            nw.setScene(scene1);
-
-            nw.showAndWait();
         });
 
 
@@ -701,6 +637,99 @@ public class Main extends Application {
         }
         return result;
     }
+
+    public void selectionDisplay(ListView listView,  ArrayList<Movie> movieSearch, String nameOfWindow){
+        Stage popUpWin=new Stage();
+        BorderPane borderPane = new BorderPane();
+        borderPane.setPadding(new Insets(0, 31, 30, 30));
+        borderPane.setCenter(listView);
+
+        Label addMovies = new Label("Select Movie:");
+        addMovies.setPadding(new Insets(10));
+        listView.setMinWidth(300);
+        Button doneButton = new Button("Return");
+        Button addButton = new Button("Add to Cart ");
+        HBox hBox1 = new HBox();
+        hBox1.setSpacing(211);
+        hBox1.getChildren().addAll(doneButton, addButton);
+
+        doneButton.setOnAction(donebutton -> {
+            popUpWin.close();
+        });
+
+        addButton.setOnAction(actionEvent -> {
+            cart.add(movieSearch.get(listView.getSelectionModel().getSelectedIndex()));
+        });
+
+        borderPane.setCenter(listView);
+        borderPane.setTop(addMovies);
+        borderPane.setBottom(hBox1);
+
+        popUpWin.initModality(Modality.APPLICATION_MODAL);
+        popUpWin.setTitle(nameOfWindow);
+
+        Scene scene1= new Scene(borderPane, 480, 350);
+
+        popUpWin.setScene(scene1);
+
+        popUpWin.showAndWait();
+    }
+
+    public void searchTextPopUp(TextField searchTextField){
+
+            Stage popUpWindow=new Stage();
+
+            popUpWindow.initModality(Modality.APPLICATION_MODAL);
+            popUpWindow.setTitle("Find criteria");
+
+            //GridPane gridPane = new GridPane();
+            BorderPane borderPane = new BorderPane();
+            borderPane.setPadding(new Insets(0, 30, 30, 30));
+            Label addMovies = new Label("Add Movie:");
+            addMovies.setPadding(new Insets(10));
+            ListView<String> listView = new ListView();
+            listView.setMinWidth(300);
+            Button doneButton = new Button("Done");
+            Button addButton = new Button("Add to Cart");
+            HBox hBox1 = new HBox();
+            hBox1.setSpacing(210);
+            hBox1.getChildren().addAll(doneButton, addButton);
+
+            doneButton.setOnAction(donebutton -> {
+                popUpWindow.close();
+            });
+
+            String userInput = searchTextField.getText();
+
+            ArrayList<Movie> movieSearch;
+            try {
+                if(loginFirstPopUp()){
+                    return;
+                }
+                movieSearch = database.searchMovie(userInput);
+                movieSearch.forEach(m -> {
+                    listView.getItems().add(m.toString());
+                });
+            } catch (Exception ex) {
+                System.out.println("error 1");
+                throw new RuntimeException(ex);
+            }
+
+            addButton.setOnAction(actionEvent -> {
+                cart.add(movieSearch.get(listView.getSelectionModel().getSelectedIndex()));
+            });
+
+            borderPane.setCenter(listView);
+            borderPane.setTop(addMovies);
+            borderPane.setBottom(hBox1);
+
+            Scene scene1= new Scene(borderPane, 400, 400);
+
+            popUpWindow.setScene(scene1);
+
+            popUpWindow.showAndWait();
+    }
+
 
     public static void main(String[] args) {
         launch(args);
