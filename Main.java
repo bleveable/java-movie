@@ -95,7 +95,10 @@ public class Main extends Application {
         signInButton.setPrefWidth(70);
         signInButton.setPrefHeight(30);
 
-        logInWindow(signInButton, "Sign in");
+        signInButton.setOnAction(e -> {
+            logInWindow("Sign in");
+        });
+
 
         //logout button
         Button logoutButton = new Button("Logout");
@@ -374,14 +377,15 @@ public class Main extends Application {
 
         });
 
-
-
         //Button 5 Account
         Button button5 = new Button("Account");
         button5.setStyle("-fx-background-color: whitesmoke; -fx-text-fill: grey; -fx-font-size: 2em");
         vBox.setMargin(button5, new Insets(5, 0, 0, 15));
         button5.setFont(new Font("Courier", 14));
-        logInWindow(button5, "Account");
+        button5.setOnAction( e -> {
+            logInWindow("Account");
+        });
+
 
         //Separate last two button with a line
         Line line = new Line();
@@ -463,8 +467,7 @@ public class Main extends Application {
     }
 
     //This method creates a login window, parameters are the button being pressed and the name of the new window
-    public void logInWindow(Button button, String name) {
-        button.setOnAction(e -> {
+    public void logInWindow(String name) {
             Stage nw=new Stage();
 
             nw.initModality(Modality.APPLICATION_MODAL);
@@ -499,27 +502,11 @@ public class Main extends Application {
             });
 
             loginButton.setOnAction(ok ->{
-                try {
-                    logIn = database.logIn(firstNameField.getText(), passwordField.getText());
-                    if(logIn == null){
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Log In Failed");
-                        alert.setHeaderText(null);
-                        alert.setContentText("You must login before you can use the system.");
-                        alert.showAndWait();
-                    } else{
-                        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-                        alert.setTitle("Log In Was Successful");
-                        alert.setHeaderText(null);
-                        alert.setContentText("You may now use the system.");
-                        alert.showAndWait();
-                        nw.close();
-                    }
-                } catch (Exception ex) {
-                    System.out.println("error 1");
-                    throw new RuntimeException(ex);
-                }
+                loginEntered(firstNameField, passwordField, nw);
+            });
 
+            passwordField.setOnAction(enter -> {
+                loginEntered(firstNameField, passwordField, nw);
             });
 
             gridPane.add(firstNameLabel, 0, 0);
@@ -538,7 +525,30 @@ public class Main extends Application {
             nw.setScene(scene1);
 
             nw.showAndWait();
-        });
+    }
+
+    //This function is used to accept entering to your account
+    public void loginEntered(TextField firstNameField, PasswordField passwordField, Stage nw){
+        try {
+            logIn = database.logIn(firstNameField.getText(), passwordField.getText());
+            if(logIn == null){
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Log In Failed");
+                alert.setHeaderText(null);
+                alert.setContentText("You must login before you can use the system.");
+                alert.showAndWait();
+            } else{
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Log In Was Successful");
+                alert.setHeaderText(null);
+                alert.setContentText("You may now use the system.");
+                alert.showAndWait();
+                nw.close();
+            }
+        } catch (Exception ex) {
+            System.out.println("error 1");
+            throw new RuntimeException(ex);
+        }
     }
 
     //This method creates a login window, parameters are the button being pressed and the name of the new window
