@@ -10,76 +10,76 @@ package javamovie;
  * @author Brijian
  */
 public class Customer {
-    private int custID;
     private String firstName;
     private String lastName;
     private String dateOfBirth;
     private String email;
-    
+    private int customerId;
+
     public Customer() {
-        custID = -1;
         firstName = "";
         lastName = "";
         dateOfBirth = "";
         email = "";
+        customerId = 0;
     }
-    
-    public Customer(int idIn, String firstIn, String lastIn, String dobIn, String emailIn) {
-        custID = idIn;
+
+    public Customer(int CustomerID, String firstIn, String lastIn, String dobIn, String phoneNum) {
         firstName = firstIn;
         lastName = lastIn;
         dateOfBirth = dobIn;
-        email = emailIn;
-    }   
-    
-    public int getID() {
-        return custID;
+        phoneNum = phoneNum;
+        this.customerId = customerId;
     }
-    
+
     public String getFirst() {
         return firstName;
     }
-    
+
     public String getLast() {
         return lastName;
     }
-    
+
     public String getDob() {
         return dateOfBirth;
     }
-    
-    public String getEmail() {
-        return email;
-    }
-    
-    public void setID(int idIn) {
-        custID = idIn;
-    }
-    
+
     public void setFirst(String firstIn) {
         firstName = firstIn;
     }
-    
+
     public void setLast(String lastIn) {
         lastName = lastIn;
     }
-    
+
     public void setDob(String dobIn) {
         dateOfBirth = dobIn;
     }
-    
-    public void setEmail(String emailIn) {
-        email = emailIn;
+
+    public String getEmail() {
+        return email;
     }
-    
-     @Override
+
+    public void setEmail(String phoneNum) {
+        this.email = email;
+    }
+
+    public int getCustomerId() {
+        return customerId;
+    }
+
+    public void setCustomerId(int customerId) {
+        this.customerId = customerId;
+    }
+
+    @Override
     public String toString() {
         return "Customer{" +
                 "firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", dateOfBirth='" + dateOfBirth + '\'' +
-                ", email=" + email +
-                ", customerId=" + custID +
+                ", phoneNum=" + email +
+                ", customerId=" + customerId +
                 '}';
     }
 }

@@ -274,7 +274,7 @@ public class DBOperation {
             result = custCheck.executeQuery();
             result.next();
             customer = new Customer();
-            customer.setID(custID);
+            customer.setCustomerId(custID);
             customer.setFirst(result.getString("firstname"));
             customer.setLast(result.getString("lastname"));
             customer.setDob(result.getString("dob"));
@@ -291,30 +291,31 @@ public class DBOperation {
         ResultSet result = customerCheck.executeQuery();
         if(result.next()) {
             customer = new Customer();
-            customer.setID(result.getInt("customerId"));
+            customer.setCustomerId(result.getInt("customerId"));
             customer.setFirst(result.getString("firstname"));
             customer.setLast(result.getString("lastname"));
-            customer.setEmail(result.getString("phonenum"));
+            customer.setEmail(result.getString("email"));
         }
         return customer;
     }
     
     public ArrayList<Movie> searchMovie(String search) throws Exception {
-       ArrayList<Movie> retArray = new ArrayList<>();
-       Movie insMovie;
-       PreparedStatement movieCheck = con.prepareStatement("SELECT name, year, price, genre, poster from movies "
-               + "WHERE name like '%" + search + "%'");
-       ResultSet result = movieCheck.executeQuery();
-       while (result.next()) {
-           insMovie = new Movie();
-           insMovie.setName(result.getString("name"));
-           insMovie.setYear(result.getInt("year"));
-           insMovie.setPrice(result.getDouble("price"));
-           insMovie.setGenre(result.getString("genre"));
-           insMovie.setPoster(result.getString("poster"));
-           retArray.add(insMovie);
-       }
-       return retArray;
+        ArrayList<Movie> retArray = new ArrayList<>();
+        Movie insMovie;
+        PreparedStatement movieCheck = con.prepareStatement("SELECT movieid, name, year, price, genre, poster from movies "
+                + "WHERE name like '%" + search + "%'");
+        ResultSet result = movieCheck.executeQuery();
+        while (result.next()) {
+            insMovie = new Movie();
+            insMovie.setName(result.getString("name"));
+            insMovie.setId(result.getInt("movieid"));
+            insMovie.setYear(result.getInt("year"));
+            insMovie.setPrice(result.getDouble("price"));
+            insMovie.setGenre(result.getString("genre"));
+            insMovie.setPoster(result.getString("poster"));
+            retArray.add(insMovie);
+        }
+        return retArray;
     }
     
     public ArrayList<Movie> searchGenre(String search) throws Exception {
@@ -340,7 +341,7 @@ public class DBOperation {
             String driver = "com.mysql.cj.jdbc.Driver";
             String url = "jdbc:mysql://localhost:3306/javamovie";
             String username = "root";
-            String password = "Moneyball911!";
+            String password = "";
             Class.forName(driver);
             
             Connection conn = DriverManager.getConnection(url, username, password);
@@ -351,6 +352,41 @@ public class DBOperation {
             e.printStackTrace(System.err);
         }
         return null;
+    }
+    
+    public void purchases(int customerID, int movieID) throws SQLException {
+        try {
+            java.sql.Date sqlDate = new java.sql.Date(new java.util.Date().getTime());
+
+            PreparedStatement statement = con.prepareStatement("INSERT INTO transactions(customerid, movieid, transactiondate) VALUES"
+                    + "('" + customerID + "', '" + movieID + "', '" + sqlDate + "')");
+
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public ArrayList<Movie> topChart() throws SQLException {
+        ArrayList<Movie> retArray = new ArrayList<>();
+
+        try {
+            Movie insMovie;
+            PreparedStatement statement = con.prepareStatement("SELECT m.name, m.price, COUNT(*) AS num_movies from transactions t "
+                    +" JOIN movies m ON m.movieid = t.movieid "+
+                    " GROUP BY t.movieid ORDER BY num_movies DESC, m.name ASC");
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                insMovie = new Movie();
+                insMovie.setName(result.getString("name"));
+                insMovie.setPrice(result.getInt("price"));
+                retArray.add(insMovie);
+            }
+            return retArray;
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+        return retArray;
     }
     
     public String hashPass(String initialPass) {
@@ -369,5 +405,39 @@ public class DBOperation {
         return hash;
     }
     
+    public Movie searchPoster(String search) throws Exception {
+        Movie insMovie = null;
+        PreparedStatement movieCheck = con.prepareStatement("SELECT movieid, name, year, price, genre, poster from movies "
+                + "WHERE poster like '%" + search + "%'");
+        ResultSet result = movieCheck.executeQuery();
+        while (result.next()) {
+            insMovie = new Movie();
+            insMovie.setName(result.getString("name"));
+            insMovie.setId(result.getInt("movieid"));
+            insMovie.setYear(result.getInt("year"));
+            insMovie.setPrice(result.getDouble("price"));
+            insMovie.setGenre(result.getString("genre"));
+            insMovie.setPoster(result.getString("poster"));
+        }
+        return insMovie;
+    }
     
+    public ArrayList<Movie> newReleases() throws Exception {
+        ArrayList<Movie> retArray = new ArrayList<>();
+        Movie insMovie;
+        PreparedStatement movieCheck = con.prepareStatement("SELECT movieid, name, year, price, genre, poster from movies "
+                + "WHERE year >= 2018");
+        ResultSet result = movieCheck.executeQuery();
+        while (result.next()) {
+            insMovie = new Movie();
+            insMovie.setName(result.getString("name"));
+            insMovie.setId(result.getInt("movieid"));
+            insMovie.setYear(result.getInt("year"));
+            insMovie.setPrice(result.getDouble("price"));
+            insMovie.setGenre(result.getString("genre"));
+            insMovie.setPoster(result.getString("poster"));
+            retArray.add(insMovie);
+        }
+        return retArray;
+    }
 }
