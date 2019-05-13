@@ -173,5 +173,22 @@ public class DBOperation {
         }
         return retArray;
     }
+
+    public Movie searchPoster(String search) throws Exception {
+        Movie insMovie = null;
+        PreparedStatement movieCheck = con.prepareStatement("SELECT movieid, name, year, price, genre, poster from movies "
+                + "WHERE poster like '%" + search + "%'");
+        ResultSet result = movieCheck.executeQuery();
+        while (result.next()) {
+            insMovie = new Movie();
+            insMovie.setName(result.getString("name"));
+            insMovie.setId(result.getInt("movieid"));
+            insMovie.setYear(result.getInt("year"));
+            insMovie.setPrice(result.getDouble("price"));
+            insMovie.setGenre(result.getString("genre"));
+            insMovie.setPoster(result.getString("poster"));
+        }
+        return insMovie;
+    }
 }
 
