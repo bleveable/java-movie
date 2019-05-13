@@ -48,7 +48,7 @@ public class Main extends Application {
 
         Scene scene = new Scene(borderPane, 1100, 600);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Movie Play");
+        primaryStage.setTitle("Film Shop");
         primaryStage.show();
     }
 
@@ -69,7 +69,7 @@ public class Main extends Application {
 
 
         //Logo Label MOVIE PLAY
-        Label labelLogo = new Label("Movie Play");
+        Label labelLogo = new Label("Film Shop");
         labelLogo.setFont(new Font("Courier", 30));
         labelLogo.setTextFill(Color.GRAY);
         labelLogo.setStyle("-fx-font-weight: bold");
@@ -119,6 +119,7 @@ public class Main extends Application {
                 signInButton.setVisible(true);
                 loginButton.setVisible(true);
                 logoutButton.setVisible(false);
+                cart = new ArrayList<>();;
             }
         });
 
@@ -166,7 +167,13 @@ public class Main extends Application {
                     total -= 2;
                 }
             }
-            Label amountSaved = new Label("Amount Saved: $" + String.format("%d", movieCount * 2));
+            Label amountSaved;
+            if (member) {
+                amountSaved = new Label("Amount Saved: $" + String.format("%d", movieCount * 2));
+            }
+            else { 
+                amountSaved = new Label("Amount Saved: $" + String.format("%d", 0));
+            }
             Label labelTotal = new Label("Total: $" + String.format("%.2f", total));
             labelTotal.setPadding(new Insets(100, 0, 0, 0));
 
@@ -209,7 +216,7 @@ public class Main extends Application {
             borderPane.setCenter(listView);
             borderPane.setRight(vBox);
 
-            Scene scene1 = new Scene(borderPane, 500, 320);
+            Scene scene1 = new Scene(borderPane, 500, 400);
 
             nw.setScene(scene1);
 
@@ -246,7 +253,7 @@ public class Main extends Application {
         vBox.setPadding(new Insets(10, 20, 20, 0));
 
         //Button 1 MOVIES AND TV
-        Button button1 = new Button("MOVIES AND TV");
+        Button button1 = new Button("MOVIES");
         button1.setStyle("-fx-background-color: red; -fx-text-fill: white; -fx-font-weight: bold");
         button1.setPrefHeight(30);
         button1.setPrefWidth(180);
@@ -267,7 +274,7 @@ public class Main extends Application {
         genreList.add("Thriller");
         genreList.add("Crime");
         genreList.add("Animation");
-        genreList.add("Adventure");
+        genreList.add("Documentary");
         genreList.add("Comedy");
 
         MenuButton menuButton = new MenuButton("Genres");
@@ -631,17 +638,19 @@ public class Main extends Application {
             Button logOut = new Button("Log out");
             logOut.setOnMouseClicked(click -> {
                 logIn = null;
+                cart = new ArrayList<>();
                 signInButton.setVisible(true);
                 loginButton.setVisible(true);
                 logoutButton.setVisible(false);
+                nw.close();
             });
             gridPane.add(logOut, 0, 8);
             
-            scene1 = new Scene(borderPane, 320, 250);
+            scene1 = new Scene(borderPane, 320, 320);
         }
 
         nw.setScene(scene1);
-
+        
         nw.showAndWait();
     }
 

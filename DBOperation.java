@@ -379,7 +379,7 @@ public class DBOperation {
             while (result.next()) {
                 insMovie = new Movie();
                 insMovie.setName(result.getString("name"));
-                insMovie.setPrice(result.getInt("price"));
+                insMovie.setPrice(result.getDouble("price"));
                 retArray.add(insMovie);
             }
             return retArray;
