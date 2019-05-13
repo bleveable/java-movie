@@ -24,12 +24,12 @@ public class Customer {
         customerId = 0;
     }
 
-    public Customer(int CustomerID, String firstIn, String lastIn, String dobIn, String phoneNum) {
+    public Customer(int customerID, String firstIn, String lastIn, String dobIn, String email) {
         firstName = firstIn;
         lastName = lastIn;
         dateOfBirth = dobIn;
-        phoneNum = phoneNum;
-        this.customerId = customerId;
+        this.email = email;
+        this.customerId = customerID;
     }
 
     public String getFirst() {
@@ -60,7 +60,7 @@ public class Customer {
         return email;
     }
 
-    public void setEmail(String phoneNum) {
+    public void setEmail(String email) {
         this.email = email;
     }
 

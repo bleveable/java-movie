@@ -440,4 +440,32 @@ public class DBOperation {
         }
         return retArray;
     }
+    
+    public void addMember(int customerID) {
+        try {
+            PreparedStatement statement = con.prepareStatement("INSERT INTO memberships(customerid) VALUES"
+                    + "('" + customerID + "')");
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+    
+    public boolean isMember(int customerID) {
+        try {
+            int custID;
+            PreparedStatement logCheck = con.prepareStatement("SELECT CustomerID from memberships "
+                + "WHERE CustomerID = '" + customerID + "'");
+            ResultSet result = logCheck.executeQuery();
+            if (result.next()) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        } catch (SQLException e) {
+            System.out.println(e);
+        }
+        return false;
+    }
 }

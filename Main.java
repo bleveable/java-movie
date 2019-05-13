@@ -140,6 +140,9 @@ public class Main extends Application {
             Button deleteButton = new Button("Delete Movie");
             Stage nw = new Stage();
             double total = 0;
+            int movieCount = 0;
+            boolean member = database.isMember(logIn.getCustomerId());
+            
 
             Button returnButton = new Button("Continue Shopping");
             returnButton.setOnAction(e3 -> {
@@ -158,7 +161,12 @@ public class Main extends Application {
             for (Movie movie : cart) {
                 listView.getItems().add(movie.toString());
                 total += movie.getPrice();
+                ++movieCount;
+                if (member) {
+                    total -= 2;
+                }
             }
+            Label amountSaved = new Label("Amount Saved: $" + String.format("%d", movieCount * 2));
             Label labelTotal = new Label("Total: $" + String.format("%.2f", total));
             labelTotal.setPadding(new Insets(100, 0, 0, 0));
 
@@ -195,7 +203,7 @@ public class Main extends Application {
 
             VBox vBox = new VBox();
             vBox.setPadding(new Insets(20));
-            vBox.getChildren().addAll(returnButton, deleteButton, labelTotal, checkOut);
+            vBox.getChildren().addAll(returnButton, deleteButton, amountSaved, labelTotal, checkOut);
             vBox.setSpacing(10);
             borderPane.setTop(yourShopCart);
             borderPane.setCenter(listView);
@@ -456,9 +464,12 @@ public class Main extends Application {
                 String posterName = imageFile.getName().replace(".jpg", "");
 
                 ImageView image = new ImageView(imageFile.toURI().toURL().toString());
+                ImageView image2 = new ImageView(imageFile.toURI().toURL().toString());
                 image.setFitHeight(200);
                 image.setFitWidth(150);
-
+                image2.setFitHeight(200);
+                image2.setFitWidth(150);
+                
                 image.setOnMouseClicked(ex -> {
                     Stage popUpWindow = new Stage();
 
@@ -499,7 +510,7 @@ public class Main extends Application {
                         popUpWindow.close();
                     });
 
-                    borderPane.setLeft(image);
+                    borderPane.setLeft(image2);
                     borderPane.setBottom(movieName);
                     borderPane.setRight(vBox);
 
@@ -586,10 +597,36 @@ public class Main extends Application {
             Label custLast = new Label("Last Name: " + logIn.getLast());
             Label custEmail = new Label("Email: " + logIn.getEmail());
             Label custDob = new Label("Date of Birth: " + logIn.getDob());
+            Label member = new Label("You can become a member for only $0");
+            Label member2 = new Label(" a month to save $2 per movie");
+            Label member3 = new Label ("Become a member?");
+            Button becomeMember = new Button("I want to be a member.");
+            becomeMember.setOnMouseClicked(click -> {
+                if (!database.isMember(logIn.getCustomerId())) {
+                    database.addMember(logIn.getCustomerId());
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("You are now a member");
+                    alert.setHeaderText(null);
+                    alert.setContentText("You are now a member");
+                    alert.showAndWait();
+                }
+                else {
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                    alert.setTitle("You're already a member!");
+                    alert.setHeaderText(null);
+                    alert.setContentText("You're already a member!");
+                    alert.showAndWait(); 
+                }
+            });
             gridPane.add(custFirst, 0, 0);
-            gridPane.add(custLast, 0, 2);
-            gridPane.add(custEmail, 0, 4);
-            gridPane.add(custDob, 0, 6);
+            gridPane.add(custLast, 0, 1);
+            gridPane.add(custEmail, 0, 2);
+            gridPane.add(custDob, 0, 3);
+            gridPane.add(member, 0, 4);
+            gridPane.add(member2, 0, 5);
+            gridPane.add(member3, 0, 6);
+            gridPane.add(becomeMember, 0, 7);
+            
             borderPane.setCenter(gridPane);
             Button logOut = new Button("Log out");
             logOut.setOnMouseClicked(click -> {
@@ -598,7 +635,7 @@ public class Main extends Application {
                 loginButton.setVisible(true);
                 logoutButton.setVisible(false);
             });
-            borderPane.setBottom(logOut);
+            gridPane.add(logOut, 0, 8);
             
             scene1 = new Scene(borderPane, 320, 250);
         }
